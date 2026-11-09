@@ -1,0 +1,30 @@
+name: Add localization archive
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/add-localization-archive.yml
+permissions:
+  contents: write
+jobs:
+  add-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and verify the archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e ComputerTycoon_RU_09919.zip
+          curl --fail --location --retry 2 --output ComputerTycoon_RU_09919.zip https://github.com/lucinis/Computer-Tycoon-RU-0.9.9.19/releases/download/v0.9.9.19/ComputerTycoon_RU_09919.zip
+          echo 'bbf724fa60b691745cf11b52b765d3ca10e8d2ed22c7d6c8cd2b053ea9e24ef7  ComputerTycoon_RU_09919.zip' | sha256sum --check --strict
+      - name: Add the archive to the file list
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name lucinis
+          git config user.email 98884850+lucinis@users.noreply.github.com
+          git add -- ComputerTycoon_RU_09919.zip
+          git commit -m "Добавить архив русификатора в список файлов"
+          git push origin HEAD:main
